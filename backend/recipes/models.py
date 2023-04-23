@@ -107,9 +107,9 @@ class Recipe(models.Model):
         ],
         verbose_name='Время приготовления(в минутах)',
     )
-    ingridients = models.ManyToManyField(
+    ingredients = models.ManyToManyField(
         Ingredient,
-        through='RecipeIngridient',
+        through='RecipeIngredient',
         related_name='recipes',
         verbose_name='Ингредиенты'
     )
@@ -122,6 +122,8 @@ class Recipe(models.Model):
         verbose_name='Дата добавления рецепта',
     )
 
+    objects = RecipeQuerySet.as_manager()
+
     class Meta:
         verbose_name = 'Рецепт'
         verbose_name_plural = 'Рецепты'
@@ -131,13 +133,13 @@ class Recipe(models.Model):
         return self.name
 
 
-class RecipeIngridient(models.Model):
+class RecipeIngredient(models.Model):
     recipe = models.ForeignKey(
         Recipe,
         on_delete=models.CASCADE,
         related_name='ingridient_list',
     )
-    ingridient = models.ForeignKey(
+    ingredient = models.ForeignKey(
         Ingredient,
         on_delete=models.CASCADE,
     )
@@ -158,7 +160,7 @@ class RecipeIngridient(models.Model):
     def __str__(self):
         return (
             f'{self.recipe}:'
-            f'{self.ingridient.name} - {self.amount}'
+            f'{self.ingredient.name} - {self.amount}'
         )
 
 

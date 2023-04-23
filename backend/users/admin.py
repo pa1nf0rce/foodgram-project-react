@@ -1,5 +1,5 @@
 from django.contrib import admin
-from users.models import CustomUser, Follow
+from users.models import CustomUser, Subscribe
 
 admin.site.register(CustomUser)
-admin.site.register(Follow)
+admin.site.register(Subscribe)

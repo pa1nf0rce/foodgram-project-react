@@ -1,5 +1,5 @@
 from django.contrib import admin
-from recipes.models import (Favorite, Ingredient, Recipe, RecipeIngridient,
+from recipes.models import (Favorite, Ingredient, Recipe, RecipeIngredient,
                             ShoppingCart, Tag)
 
 
@@ -14,7 +14,7 @@ class RecipeIngridientAdmin(admin.ModelAdmin):
 
 
 class RecipeIngridientInline(admin.TabularInline):
-    model = RecipeIngridient
+    model = RecipeIngredient
     min_num = 1
     extra = 0
 
@@ -35,7 +35,7 @@ class RecipeAdmin(admin.ModelAdmin):
     search_fields = ('name',)
     filter_horizontal = ('tags',)
     list_filter = ('tags', 'author',)
-    autocomplete_fields = ('ingridients',)
+    autocomplete_fields = ('ingredients',)
     inlines = (RecipeIngridientInline,)
     readonly_fields = ('number_of_additions_to_favorites',)
 
@@ -46,6 +46,6 @@ class RecipeAdmin(admin.ModelAdmin):
 admin.site.register(Ingredient, IngridientAdmin)
 admin.site.register(Tag, TagAdmin)
 admin.site.register(Recipe, RecipeAdmin)
-admin.site.register(RecipeIngridient, RecipeIngridientAdmin)
+admin.site.register(RecipeIngredient, RecipeIngridientAdmin)
 admin.site.register(ShoppingCart)
 admin.site.register(Favorite)
