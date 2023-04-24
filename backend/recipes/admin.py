@@ -40,7 +40,7 @@ class RecipeAdmin(admin.ModelAdmin):
     readonly_fields = ('number_of_additions_to_favorites',)
 
     def save_model(self, request, obj, form, change):
-        obj.save(from_admin=True)
+        obj.save()
 
 
 admin.site.register(Ingredient, IngridientAdmin)

@@ -3,25 +3,32 @@ from django.db import models
 from django.db.models import Exists, OuterRef, UniqueConstraint
 
 
-# class CustomUserQuerySet(models.QuerySet):
-#     def add_user_annotations(self, user_id):
-#         return self.annotate(
-#             is_subscribed=Exists(
-#                 Subscribe.objects.filter(
-#                     user_id=user_id, author__pk=OuterRef('pk')
-#                 )
-#             ),
-#         )
+class SubscribeQuerySet(models.QuerySet):
+    def add_user_annotations(self, user_id):
+        return self.annotate(
+            is_subscribed=Exists(
+                Subscribe.objects.filter(
+                    user_id=user_id, author__pk=OuterRef('pk')
+                )
+            ),
+        )
 
 
 class CustomUser(AbstractUser):
+    USERNAME_FIELD = 'email'
+    REQUIRED_FIELDS = [
+        'username',
+        'first_name',
+        'last_name',
+        'password',
+    ]
     email = models.EmailField(
         max_length=200,
         unique=True,
         verbose_name='E-mail адрес'
     )
 
-    # objects = CustomUserQuerySet.as_manager()
+    objects = SubscribeQuerySet.as_manager()
 
     class Meta:
         verbose_name = 'Пользователь'

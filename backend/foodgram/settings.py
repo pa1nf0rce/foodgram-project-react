@@ -1,5 +1,6 @@
 
 import os
+from datetime import timedelta
 
 from dotenv import find_dotenv, load_dotenv
 
@@ -32,7 +33,7 @@ INSTALLED_APPS = [
     'django.contrib.messages',
     'django.contrib.staticfiles',
     'rest_framework',
-    'rest_framework.authtoken',
+    'rest_framework_simplejwt',
     'djoser',
     'users',
     'api',
@@ -109,7 +110,7 @@ REST_FRAMEWORK = {
         'rest_framework.permissions.AllowAny',
     ],
     'DEFAULT_AUTHENTICATION_CLASSES': [
-        'rest_framework.authentication.TokenAuthentication',
+        'rest_framework_simplejwt.authentication.JWTAuthentication',
     ],
     'DEFAULT_FILTER_BACKENDS': [
         'django_filters.rest_framework.DjangoFilterBackend',
@@ -121,8 +122,9 @@ REST_FRAMEWORK = {
     'SEARCH_PARAM': 'name',
 }
 
-DJOSER = {
-    'LOGIN_FIELD': 'email',
+SIMPLE_JWT = {
+    'AUTH_HEADER_TYPES': ('Bearer',),
+    'ACCESS_TOKEN_LIFETIME': timedelta(hours=24),
 }
 
 LANGUAGE_CODE = 'ru'

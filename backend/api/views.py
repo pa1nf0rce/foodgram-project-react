@@ -15,7 +15,7 @@ from users.models import Subscribe
 from .permission import IsAuthorOrReadOnly
 from .serializers import (IngredientSerializer, ReadRecipeSerializer,
                           ReadUserSerializer, RecipeSerializer,
-                          SetPasswordSerializer, SubscribeAuthorSerializer,
+                          SetPasswordSerializer, SubscribeSerializer,
                           SubscriptionsSerializer, TagSerializer,
                           UserSerializer)
 
@@ -67,7 +67,7 @@ class UserViewSet(mixins.CreateModelMixin,
         author = get_object_or_404(User, id=kwargs['pk'])
 
         if request.method == 'POST':
-            serializer = SubscribeAuthorSerializer(
+            serializer = SubscribeSerializer(
                 author, data=request.data, context={"request": request})
             serializer.is_valid(raise_exception=True)
             Subscribe.objects.create(user=request.user, author=author)

@@ -6,25 +6,25 @@ from django.db.models import Exists, OuterRef, UniqueConstraint
 User = get_user_model()
 
 
-class RecipeQuerySet(models.QuerySet):
-    def filter_by_tags(self, tags):
-        if tags:
-            return self.filter(tag__slug__in=tags).distinct()
-        return self
+# class RecipeQuerySet(models.QuerySet):
+#     def filter_by_tags(self, tags):
+#         if tags:
+#             return self.filter(tag__slug__in=tags).distinct()
+#         return self
 
-    def add_user_annotations(self, user_id):
-        return self.annotate(
-            is_favorited=Exists(
-                Favorite.objects.filter(
-                    user_id=user_id, recipe__pk=OuterRef('pk')
-                )
-            ),
-            is_in_shopping_cart=Exists(
-                ShoppingCart.objects.filter(
-                    user_id=user_id, recipe__pk=OuterRef('pk')
-                )
-            ),
-        )
+#     def add_user_annotations(self, user_id):
+#         return self.annotate(
+#             is_favorited=Exists(
+#                 Favorite.objects.filter(
+#                     user_id=user_id, recipe__pk=OuterRef('pk')
+#                 )
+#             ),
+#             is_in_shopping_cart=Exists(
+#                 ShoppingCart.objects.filter(
+#                     user_id=user_id, recipe__pk=OuterRef('pk')
+#                 )
+#             ),
+#         )
 
 
 class Tag(models.Model):
@@ -122,7 +122,7 @@ class Recipe(models.Model):
         verbose_name='Дата добавления рецепта',
     )
 
-    objects = RecipeQuerySet.as_manager()
+    # objects = RecipeQuerySet.as_manager()
 
     class Meta:
         verbose_name = 'Рецепт'
