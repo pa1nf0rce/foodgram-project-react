@@ -29,6 +29,11 @@ class UserViewSet(mixins.CreateModelMixin,
     permission_classes = (AllowAny,)
     pagination_class = LimitPagination
 
+    def get_queryset(self):
+        qs = User.objects.add_user_annotations(self.request.user.pk)
+        return qs
+    
+
     def get_serializer_class(self):
         if self.action in ('list', 'retrieve'):
             return ReadUserSerializer
@@ -77,7 +82,7 @@ class UserViewSet(mixins.CreateModelMixin,
         if request.method == 'DELETE':
             get_object_or_404(Subscribe, user=request.user,
                               author=author).delete()
-            return Response({'detail': 'Успешная отписка'},
+            return Response({'detail': f'Вы успешно отписались от {author}'},
                             status=status.HTTP_204_NO_CONTENT)
 
 
@@ -108,6 +113,10 @@ class RecipeViewSet(viewsets.ModelViewSet):
     filter_backends = (DjangoFilterBackend, )
     http_method_names = ['get', 'post', 'patch', 'create', 'delete']
 
+    def get_queryset(self):
+            qs = Recipe.objects.add_user_annotations(self.request.user.pk)
+            return qs
+
     def get_serializer_class(self):
         if self.action in ('list', 'retrieve'):
             return ReadRecipeSerializer
@@ -122,13 +131,11 @@ class RecipeViewSet(viewsets.ModelViewSet):
             serializer = RecipeSerializer(recipe, data=request.data,
                                           context={"request": request})
             serializer.is_valid(raise_exception=True)
-            if not Favorite.objects.filter(user=request.user,
-                                           recipe=recipe).exists():
-                Favorite.objects.create(user=request.user, recipe=recipe)
-                return Response(serializer.data,
-                                status=status.HTTP_201_CREATED)
-            return Response({'errors': 'Рецепт уже в избранном.'},
-                            status=status.HTTP_400_BAD_REQUEST)
+            Favorite.objects.create(user=request.user, recipe=recipe)
+            return Response(
+                serializer.data,
+                status=status.HTTP_201_CREATED
+            )
 
         if request.method == 'DELETE':
             get_object_or_404(Favorite, user=request.user,
@@ -146,13 +153,9 @@ class RecipeViewSet(viewsets.ModelViewSet):
             serializer = RecipeSerializer(recipe, data=request.data,
                                           context={"request": request})
             serializer.is_valid(raise_exception=True)
-            if not ShoppingCart.objects.filter(user=request.user,
-                                                recipe=recipe).exists():
-                ShoppingCart.objects.create(user=request.user, recipe=recipe)
-                return Response(serializer.data,
+            ShoppingCart.objects.create(user=request.user, recipe=recipe)
+            return Response(serializer.data,
                                 status=status.HTTP_201_CREATED)
-            return Response({'errors': 'Рецепт уже в списке покупок.'},
-                            status=status.HTTP_400_BAD_REQUEST)
 
         if request.method == 'DELETE':
             get_object_or_404(ShoppingCart, user=request.user,

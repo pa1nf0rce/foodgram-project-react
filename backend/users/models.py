@@ -1,6 +1,7 @@
 from django.contrib.auth.models import AbstractUser
 from django.db import models
-from django.db.models import Exists, OuterRef, UniqueConstraint
+from django.db.models import (CheckConstraint, Exists, OuterRef,
+                              UniqueConstraint)
 
 
 class SubscribeQuerySet(models.QuerySet):
@@ -12,7 +13,6 @@ class SubscribeQuerySet(models.QuerySet):
                 )
             ),
         )
-
 
 class CustomUser(AbstractUser):
     USERNAME_FIELD = 'email'
@@ -58,6 +58,10 @@ class Subscribe(models.Model):
             UniqueConstraint(
                 fields=('author', 'user',),
                 name='unique_follow',
+            ),
+            CheckConstraint(
+                check=~models.Q(user=models.F('author')),
+                name="prevent_self_subscription"
             )
         ]
 

@@ -1,5 +1,6 @@
 import base64
 
+from rest_framework import status
 from django.contrib.auth import get_user_model
 from django.contrib.auth.password_validation import validate_password
 from django.core import exceptions
@@ -85,7 +86,7 @@ class Base64ImageField(serializers.ImageField):
 
 
 class ReadUserSerializer(UserSerializer):
-    is_subscribed = serializers.SerializerMethodField()
+    is_subscribed = serializers.BooleanField()
 
     class Meta:
         model = User
@@ -99,23 +100,18 @@ class ReadUserSerializer(UserSerializer):
         )
         extra_kwargs = {'password': {'write_only': True}}
 
-    def get_is_subscribed(self, obj):
-        if (self.context.get('request')
-           and not self.context['request'].user.is_anonymous):
-            return Subscribe.objects.filter(user=self.context['request'].user,
-                                            author=obj).exists()
-        return False
 
 class UserSerializer(UserCreateSerializer):
 
     class Meta:
         model = User
-        fields = ('id',
-                  'email',
-                  'username',
-                  'first_name',
-                  'last_name',
-                  'password',
+        fields = (
+            'id',
+            'email',
+            'username',
+            'first_name',
+            'last_name',
+            'password',
         )
         extra_kwargs = {
             'first_name': {'required': True, 'allow_blank': False},
@@ -144,18 +140,17 @@ class SetPasswordSerializer(serializers.Serializer):
             raise serializers.ValidationError(
                 {'new_password': list(e.messages)}
             )
-        return super().validate(obj)
-
-    def update(self, instance, validated_data):
-        if not instance.check_password(validated_data['current_password']):
-            raise serializers.ValidationError(
-                {'current_password': 'Неправильный пароль.'}
-            )
-        if (validated_data['current_password']
-           == validated_data['new_password']):
+        if obj['new_password']==obj['current_password']:
             raise serializers.ValidationError(
                 {'new_password': 'Новый пароль должен отличаться от текущего.'}
             )
+        if not self.instance.check_password(obj['current_password']):
+            raise serializers.ValidationError(
+                {'current_password': 'Неправильный пароль.'}
+            )
+        return super().validate(obj)
+
+    def update(self, instance, validated_data):
         instance.set_password(validated_data['new_password'])
         instance.save()
         return validated_data
@@ -173,28 +168,21 @@ class ShortReadRecipeSerializer(serializers.ModelSerializer):
 
 
 class SubscriptionsSerializer(serializers.ModelSerializer):
-    is_subscribed = serializers.SerializerMethodField()
+    is_subscribed = serializers.BooleanField()
     recipes = serializers.SerializerMethodField()
     recipes_count = serializers.SerializerMethodField()
 
     class Meta:
         model = User
         fields = (
-                  'id',
-                  'email',
-                  'username',
-                  'first_name',
-                  'last_name',
-                  'is_subscribed',
-                  'recipes',
-                  'recipes_count'
-        )
-
-    def get_is_subscribed(self, obj):
-        return (
-            self.context.get('request').user.is_authenticated
-            and Subscribe.objects.filter(user=self.context['request'].user,
-                                         author=obj).exists()
+            'id',
+            'email',
+            'username',
+            'first_name',
+            'last_name',
+            'is_subscribed',
+            'recipes',
+            'recipes_count'
         )
 
     def get_recipes_count(self, obj):
@@ -213,7 +201,7 @@ class SubscriptionsSerializer(serializers.ModelSerializer):
 class SubscribeSerializer(serializers.ModelSerializer):
     email = serializers.ReadOnlyField()
     username = serializers.ReadOnlyField()
-    is_subscribed = serializers.SerializerMethodField()
+    is_subscribed = serializers.BooleanField()
     recipes = ShortReadRecipeSerializer(
         many=True,
         read_only=True
@@ -222,22 +210,31 @@ class SubscribeSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = User
-        fields = ('email', 'id',
-                  'username', 'first_name',
-                  'last_name', 'is_subscribed',
-                  'recipes', 'recipes_count')
-
-    def validate(self, obj):
-        if (self.context['request'].user == obj):
-            raise serializers.ValidationError({'errors': 'Ошибка подписки.'})
-        return obj
-
-    def get_is_subscribed(self, obj):
-        return (
-            self.context.get('request').user.is_authenticated
-            and Subscribe.objects.filter(user=self.context['request'].user,
-                                         author=obj).exists()
+        fields = (
+            'id',
+            'email',
+            'username',
+            'first_name',
+            'last_name',
+            'is_subscribed',
+            'recipes',
+            'recipes_count'
         )
+
+    def validate(self, data):
+        author = self.instance
+        user = self.context.get('request').user
+        if Subscribe.objects.filter(author=author, user=user).exists():
+            raise serializers.ValidationError(
+                detail='Вы уже подписаны на этого пользователя!',
+                code=status.HTTP_400_BAD_REQUEST
+            )
+        if user == author:
+            raise serializers.ValidationError(
+                detail='Вы не можете подписаться на самого себя!',
+                code=status.HTTP_400_BAD_REQUEST
+            )
+        return data
 
     def get_recipes_count(self, obj):
         return obj.recipes.count()
@@ -246,22 +243,22 @@ class ReadRecipeSerializer(serializers.ModelSerializer):
     tags = TagSerializer(many=True)
     author = UserSerializer()
     ingredients = serializers.SerializerMethodField()
-    is_favorited = serializers.SerializerMethodField()
-    is_in_shopping_cart = serializers.SerializerMethodField()
+    is_favorited = serializers.BooleanField()
+    is_in_shopping_cart = serializers.BooleanField()
 
     class Meta:
         model = Recipe
         fields = (
-                'id',
-                'author',
-                'tags',
-                'ingredients',
-                'is_favorited',
-                'is_in_shopping_cart',
-                'name',
-                'image',
-                'text',
-                'cooking_time',
+            'id',
+            'author',
+            'tags',
+            'ingredients',
+            'is_favorited',
+            'is_in_shopping_cart',
+            'name',
+            'image',
+            'text',
+            'cooking_time',
         )
 
     def get_ingredients(self, obj):
@@ -269,20 +266,6 @@ class ReadRecipeSerializer(serializers.ModelSerializer):
             RecipeIngredient.objects.filter(recipe=obj).all(), many=True
         ).data
 
-    def get_is_favorited(self, obj):
-        return (
-            self.context.get('request').user.is_authenticated
-            and Favorite.objects.filter(user=self.context['request'].user,
-                                        recipe=obj).exists()
-        )
-
-    def get_is_in_shopping_cart(self, obj):
-        return (
-            self.context.get('request').user.is_authenticated
-            and ShoppingCart.objects.filter(
-                user=self.context['request'].user,
-                recipe=obj).exists()
-        )
 
 class RecipeSerializer(serializers.ModelSerializer):
     ingredients = RecipeIngredientSerializer(many=True)
@@ -292,6 +275,26 @@ class RecipeSerializer(serializers.ModelSerializer):
     )
     image = Base64ImageField()
     author = UserSerializer()
+
+    def validate(self, data):
+        user = self.context.get('request').user
+        recipe = self.instance
+        if not Favorite.objects.filter(
+            user=user,
+            recipe=recipe).exists():
+            raise serializers.ValidationError(
+                detail='Рецепт уже в избранном',
+                code=status.HTTP_400_BAD_REQUEST,
+            )
+        if not ShoppingCart.objects.filter(
+            user=user,
+            recipe=recipe,
+        ).exists():
+            raise serializers.ValidationError(
+                detail='Рецепт уже в списке покупок',
+                code=status.HTTP_400_BAD_REQUEST,
+            )
+        return data
 
     @transaction.atomic
     def create(self, validated_data):
