@@ -1,6 +1,5 @@
 
 import os
-from datetime import timedelta
 
 from dotenv import find_dotenv, load_dotenv
 
@@ -16,14 +15,8 @@ DEBUG = True
 
 ALLOWED_HOSTS = [
     '*',
-    'localhost',
-    '127.0.0.1',
 ]
 
-INTERNAL_IPS = [
-    '127.0.0.1',
-    'localhost',
-]
 
 INSTALLED_APPS = [
     'django.contrib.admin',
@@ -33,7 +26,8 @@ INSTALLED_APPS = [
     'django.contrib.messages',
     'django.contrib.staticfiles',
     'rest_framework',
-    'rest_framework_simplejwt',
+    'django_filters',
+    'rest_framework.authtoken',
     'djoser',
     'users',
     'api',
@@ -71,23 +65,23 @@ TEMPLATES = [
 
 WSGI_APPLICATION = 'foodgram.wsgi.application'
 
+# DATABASES = {
+#     'default': {
+#         'ENGINE': 'django.db.backends.sqlite3',
+#         'NAME': os.path.join(BASE_DIR, 'db.sqlite3'),
+#     }
+# }
+
 DATABASES = {
     'default': {
-        'ENGINE': 'django.db.backends.sqlite3',
-        'NAME': os.path.join(BASE_DIR, 'db.sqlite3'),
+        'ENGINE': os.getenv('DB_ENGINE', default='django.db.backends.postgresql'),
+        'NAME': os.getenv('DB_NAME', default='default'),
+        'USER': os.getenv('POSTGRES_USER', default='default'),
+        'PASSWORD': os.getenv('POSTGRES_PASSWORD', default='default'),
+        'HOST': os.getenv('DB_HOST', default='default_host'),
+        'PORT': os.getenv('DB_PORT', default='5432')
     }
-}
-# else:
-#     DATABASES = {
-#         'default': {
-#             'ENGINE': os.getenv('DB_ENGINE', default='django.db.backends.postgresql'),
-#             'NAME': os.getenv('DB_NAME', default='default'),
-#             'USER': os.getenv('POSTGRES_USER', default='default'),
-#             'PASSWORD': os.getenv('POSTGRES_PASSWORD', default='default'),
-#             'HOST': os.getenv('DB_HOST', default='default_host'),
-#             'PORT': os.getenv('DB_PORT', default='5432')
-#         }
-#     } 
+} 
 
 AUTH_PASSWORD_VALIDATORS = [
     {
@@ -109,21 +103,16 @@ REST_FRAMEWORK = {
         'rest_framework.permissions.AllowAny',
     ],
     'DEFAULT_AUTHENTICATION_CLASSES': [
-        'rest_framework_simplejwt.authentication.JWTAuthentication',
+        'rest_framework.authentication.TokenAuthentication',
     ],
     'DEFAULT_FILTER_BACKENDS': [
         'django_filters.rest_framework.DjangoFilterBackend',
     ],
-    'DEFAULT_PAGINATION_CLASS': [
-        'api.pagination.LimitPagination',
-    ],
-    'PAGE_SIZE': 6,
     'SEARCH_PARAM': 'name',
 }
 
-SIMPLE_JWT = {
-    'AUTH_HEADER_TYPES': ('Bearer',),
-    'ACCESS_TOKEN_LIFETIME': timedelta(hours=24),
+DJOSER = {
+    'LOGIN_FIELD': 'email',
 }
 
 LANGUAGE_CODE = 'ru'
@@ -133,8 +122,6 @@ TIME_ZONE = 'UTC'
 USE_I18N = True
 
 USE_L10N = True
-
-USE_TZ = True
 
 STATIC_URL = '/static/'
 

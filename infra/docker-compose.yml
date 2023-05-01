@@ -1,7 +1,7 @@
 version: '3.3'
 services:
   db:
-    image: postgres:12.4
+    image: postgres:13.0-alpine
     volumes:
       - postgresql_data:/var/lib/postgresql/data/
     env_file:
@@ -14,8 +14,8 @@ services:
              python manage.py runserver 0.0.0.0:8000"
     restart: always
     volumes:
-      - static_value:/code/static_backend/
-      - media_value:/code/media/
+      - static_value:/app/static/
+      - media_value:/app/media/
     depends_on:
       - db
     env_file:
@@ -29,7 +29,7 @@ services:
     depends_on:
       - backend
   nginx:
-    image: nginx:1.19.3
+    image: nginx:1.21.3-alpine
     ports:
       - "80:80"
     volumes:
@@ -38,7 +38,10 @@ services:
       - ../docs/:/usr/share/nginx/html/api/docs/
       - static_value:/var/html/static/
       - media_value:/var/html/media/
-  volumes:
-    static_value:
-    media_value:
-    postgresql_data:
+    depends_on:
+      - frontend
+  
+volumes:
+  static_value:
+  media_value:
+  postgresql_data:

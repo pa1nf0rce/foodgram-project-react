@@ -7,10 +7,6 @@ User = get_user_model()
 
 
 class RecipeQuerySet(models.QuerySet):
-    def filter_by_tags(self, tags):
-        if tags:
-            return self.filter(tag__slug__in=tags).distinct()
-        return self
 
     def add_user_annotations(self, user_id):
         return self.annotate(
@@ -137,11 +133,12 @@ class RecipeIngredient(models.Model):
     recipe = models.ForeignKey(
         Recipe,
         on_delete=models.CASCADE,
-        related_name='ingridient_list',
+        related_name='ingredient_list',
     )
     ingredient = models.ForeignKey(
         Ingredient,
         on_delete=models.CASCADE,
+        related_name='ingredient_list',
     )
     amount = models.PositiveSmallIntegerField(
         validators=[
@@ -168,22 +165,17 @@ class Favorite(models.Model):
     user = models.ForeignKey(
         User,
         on_delete=models.CASCADE,
-        related_name='favorites',
+        related_name='favorite_user',
     )
     recipe = models.ForeignKey(
         Recipe,
         on_delete=models.CASCADE,
-        related_name='favorites',
+        related_name='favorite_recipe',
     )
 
     class Meta:
         verbose_name = 'Избранное'
         verbose_name_plural = 'Избранное'
-        constraints = [
-            UniqueConstraint(
-                fields=('user', 'recipe',),
-                name='unique_favorite_recipe'),
-        ]
 
     def __str__(self):
         return f'{self.user} добавил рецепт {self.recipe} в избранное'
@@ -193,12 +185,12 @@ class ShoppingCart(models.Model):
     user = models.ForeignKey(
         User,
         on_delete=models.CASCADE,
-        related_name='shopping_cart',
+        related_name='shopping_user',
     )
     recipe = models.ForeignKey(
         Recipe,
         on_delete=models.CASCADE,
-        related_name='shopping_cart',
+        related_name='shopping_recipe',
     )
 
     class Meta:
