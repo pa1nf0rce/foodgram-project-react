@@ -1,8 +1,8 @@
 import base64
-from django.core import exceptions
+
 from django.contrib.auth import get_user_model
 from django.contrib.auth.password_validation import validate_password
-from django.core import exceptions as django_exceptions
+from django.core import exceptions
 from django.core.files.base import ContentFile
 from django.db import transaction
 from djoser.serializers import UserCreateSerializer, UserSerializer
@@ -66,7 +66,7 @@ class SetPasswordSerializer(serializers.Serializer):
             raise serializers.ValidationError(
                 {'new_password': list(e.messages)}
             )
-        if obj['new_password']==obj['current_password']:
+        if obj['new_password'] == obj['current_password']:
             raise serializers.ValidationError(
                 {'new_password': 'Новый пароль должен отличаться от текущего.'}
             )
@@ -85,8 +85,8 @@ class SetPasswordSerializer(serializers.Serializer):
 class Base64ImageField(serializers.ImageField):
     def to_internal_value(self, data):
         if isinstance(data, str) and data.startswith('data:image'):
-            format, imgstr = data.split(';base64,')  
-            ext = format.split('/')[-1]  
+            format, imgstr = data.split(';base64,')
+            ext = format.split('/')[-1]
             data = ContentFile(base64.b64decode(imgstr), name='temp.' + ext)
 
         return super().to_internal_value(data)
@@ -133,7 +133,11 @@ class SubscriptionsSerializer(serializers.ModelSerializer):
         recipes = obj.recipes.all()
         if limit:
             recipes = recipes[:int(limit)]
-        serializer = ShortReadRecipeSerializer(recipes, many=True, read_only=True)
+        serializer = ShortReadRecipeSerializer(
+            recipes,
+            many=True,
+            read_only=True
+        )
         return serializer.data
 
 
@@ -222,6 +226,7 @@ class RecipeIngredientCreateSerializer(serializers.ModelSerializer):
         queryset=Ingredient.objects.all()
     )
     amount = serializers.IntegerField(write_only=True, min_value=1)
+
     class Meta:
         model = RecipeIngredient
         fields = ('id', 'amount', 'recipe',)

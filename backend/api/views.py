@@ -22,6 +22,7 @@ from .serializers import (IngredientSerializer, ReadRecipeSerializer,
 
 User = get_user_model()
 
+
 class UserViewSet(mixins.CreateModelMixin,
                   mixins.ListModelMixin,
                   mixins.RetrieveModelMixin,
@@ -111,8 +112,7 @@ class RecipeViewSet(viewsets.ModelViewSet):
     http_method_names = ['get', 'post', 'patch', 'create', 'delete']
 
     def get_queryset(self):
-        qs = Recipe.objects.add_user_annotations(self.request.user.pk)
-        return qs
+        return Recipe.objects.add_user_annotations(self.request.user.pk)
 
     def get_serializer_class(self):
         if self.action in ('list', 'retrieve'):
@@ -125,8 +125,10 @@ class RecipeViewSet(viewsets.ModelViewSet):
         recipe = get_object_or_404(Recipe, id=kwargs['pk'])
 
         if request.method == 'POST':
-            serializer = ShortReadRecipeSerializer(recipe, data=request.data,
-                                          context={"request": request})
+            serializer = ShortReadRecipeSerializer(
+                recipe, data=request.data,
+                context={"request": request}
+            )
             serializer.is_valid(raise_exception=True)
             if not Favorite.objects.filter(user=request.user,
                                            recipe=recipe).exists():
@@ -149,11 +151,15 @@ class RecipeViewSet(viewsets.ModelViewSet):
         recipe = get_object_or_404(Recipe, id=kwargs['pk'])
 
         if request.method == 'POST':
-            serializer = ShortReadRecipeSerializer(recipe, data=request.data,
-                                          context={"request": request})
+            serializer = ShortReadRecipeSerializer(
+                recipe, data=request.data,
+                context={"request": request}
+            )
             serializer.is_valid(raise_exception=True)
-            if not ShoppingCart.objects.filter(user=request.user,
-                                                recipe=recipe).exists():
+            if not ShoppingCart.objects.filter(
+                user=request.user,
+                recipe=recipe
+            ).exists():
                 ShoppingCart.objects.create(user=request.user, recipe=recipe)
                 return Response(serializer.data,
                                 status=status.HTTP_201_CREATED)
