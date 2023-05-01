@@ -40,8 +40,8 @@ jobs:
       - name: Push to Docker Hub
         uses: docker/build-push-action@v2
         with:
-          context: backend/
-          push: true
+          context: .
+          file: ./backend/Dockerfile
           tags: ${{ secrets.DOCKER_USERNAME }}/foodgram_backend:latest
 
       - name: send message if push or build failed
