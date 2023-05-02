@@ -7,7 +7,9 @@ services:
     env_file:
       - ./.env
   backend:
-    image: pa1nf0rce/foodgram_backend:latest
+    build: 
+      context: ../backend
+    # image: pa1nf0rce/foodgram_backend:latest
     command: >
       sh -c "python manage.py collectstatic --noinput &&
              python manage.py migrate &&
@@ -22,7 +24,9 @@ services:
       - ./.env
 
   frontend:
-    image: pa1nf0rce/foodgram_frontend:latest
+    build:
+      context: ../frontend
+    # image: pa1nf0rce/foodgram_frontend:latest
     volumes:
       - ../frontend/:/app/result_build/
     depends_on:
