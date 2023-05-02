@@ -143,4 +143,4 @@ CORS_ALLOWED_ORIGINS = [
     'http://localhost:3000',
     'http://158.160.68.241',
     'http://localhost',
-] 
+]
