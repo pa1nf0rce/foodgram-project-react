@@ -27,7 +27,7 @@
 - Склонируйте проект из репозитория:
 
 ```sh
-$ git clone https://github.com/Mukhinart/foodgram-project-react.git
+$ git clone https://github.com/pa1nf0rce/foodgram-project-react.git
 ```
 
 - Выполните вход на удаленный сервер
@@ -86,7 +86,7 @@ sudo docker-compose exec backend python manage.py createsuperuser
 - Склонируйте проект из репозитория:
 
 ```sh
-$ git clone https://github.com/Mukhinart/foodgram-project-react.git
+$ git clone https://github.com/pa1nf0rce/foodgram-project-react.git
 ```
 
 - В папке ../infra/ переименуйте файл example.env в .env и заполните своими данными:
