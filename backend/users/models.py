@@ -1,6 +1,7 @@
 from django.contrib.auth.models import AbstractUser
 from django.db import models
-from django.db.models import CheckConstraint, UniqueConstraint, Exists, Count, OuterRef
+from django.db.models import (CheckConstraint, Count, Exists, OuterRef,
+                              UniqueConstraint)
 
 
 class SubscribeQuerySet(models.QuerySet):
@@ -11,8 +12,9 @@ class SubscribeQuerySet(models.QuerySet):
                     user_id=user_id, author__pk=OuterRef('pk')
                 )
             ),
-            recipes_count = Count('recipes'),
+            recipes_count=Count('recipes'),
         )
+
 
 class CustomUser(AbstractUser):
     USERNAME_FIELD = 'email'

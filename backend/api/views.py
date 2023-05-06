@@ -32,8 +32,7 @@ class UserViewSet(mixins.CreateModelMixin,
     pagination_class = LimitPagination
 
     def get_queryset(self):
-        qs = User.objects.add_user_annotations(self.request.user.pk)
-        return qs
+        return User.objects.add_user_annotations(self.request.user.pk)
 
     def get_serializer_class(self):
         if self.action in ('list', 'retrieve'):
