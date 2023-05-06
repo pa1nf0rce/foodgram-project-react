@@ -117,15 +117,6 @@ class SubscriptionsSerializer(serializers.ModelSerializer):
                   'last_name', 'is_subscribed',
                   'recipes', 'recipes_count')
 
-    # def get_is_subscribed(self, obj):
-    #     return (
-    #         self.context.get('request').user.is_authenticated
-    #         and Subscribe.objects.filter(user=self.context['request'].user,
-    #                                      author=obj).exists()
-    #     )
-
-    # def get_recipes_count(self, obj):
-    #     return obj.recipes.count()
 
     def get_recipes(self, obj):
         request = self.context.get('request')
@@ -160,16 +151,6 @@ class SubscribeSerializer(serializers.ModelSerializer):
         if (self.context['request'].user == obj):
             raise serializers.ValidationError({'errors': 'Ошибка подписки.'})
         return obj
-
-    # def get_is_subscribed(self, obj):
-    #     return (
-    #         self.context.get('request').user.is_authenticated
-    #         and Subscribe.objects.filter(user=self.context['request'].user,
-    #                                      author=obj).exists()
-    #     )
-
-    # def get_recipes_count(self, obj):
-    #     return obj.recipes.count()
 
 
 class IngredientSerializer(serializers.ModelSerializer):
