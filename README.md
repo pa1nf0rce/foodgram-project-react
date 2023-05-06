@@ -113,5 +113,5 @@ SECRET_KEY=<...> # секретный ключ django-проекта из settin
 ***
 
 ## :office_worker: Об авторах: 
-[Авраменко Роман](https://github.com/pa1nf0rce),
+[Авраменко Роман](https://github.com/pa1nf0rce)
 
