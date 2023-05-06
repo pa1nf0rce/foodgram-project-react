@@ -1,7 +1,18 @@
 from django.contrib.auth.models import AbstractUser
 from django.db import models
-from django.db.models import CheckConstraint, UniqueConstraint
+from django.db.models import CheckConstraint, UniqueConstraint, Exists, Count, OuterRef
 
+
+class SubscribeQuerySet(models.QuerySet):
+    def add_user_annotations(self, user_id):
+        return self.annotate(
+            is_subscribed=Exists(
+                Subscribe.objects.filter(
+                    user_id=user_id, author__pk=OuterRef('pk')
+                )
+            ),
+            recipes_count = Count('recipes'),
+        )
 
 class CustomUser(AbstractUser):
     USERNAME_FIELD = 'email'
@@ -16,6 +27,8 @@ class CustomUser(AbstractUser):
         unique=True,
         verbose_name='E-mail адрес'
     )
+
+    objects = SubscribeQuerySet.as_manager()
 
     class Meta:
         verbose_name = 'Пользователь'

@@ -15,7 +15,7 @@ User = get_user_model()
 
 class ReadUserSerializer(UserSerializer):
     """[GET] Cписок пользователей."""
-    is_subscribed = serializers.SerializerMethodField()
+    is_subscribed = serializers.BooleanField(default=False)
 
     class Meta:
         model = User
@@ -106,9 +106,9 @@ class ShortReadRecipeSerializer(serializers.ModelSerializer):
 
 class SubscriptionsSerializer(serializers.ModelSerializer):
     """[GET] Список авторов на которых подписан пользователь."""
-    is_subscribed = serializers.SerializerMethodField()
+    is_subscribed = serializers.BooleanField()
     recipes = serializers.SerializerMethodField()
-    recipes_count = serializers.SerializerMethodField()
+    recipes_count = serializers.BooleanField()
 
     class Meta:
         model = User
@@ -117,15 +117,15 @@ class SubscriptionsSerializer(serializers.ModelSerializer):
                   'last_name', 'is_subscribed',
                   'recipes', 'recipes_count')
 
-    def get_is_subscribed(self, obj):
-        return (
-            self.context.get('request').user.is_authenticated
-            and Subscribe.objects.filter(user=self.context['request'].user,
-                                         author=obj).exists()
-        )
+    # def get_is_subscribed(self, obj):
+    #     return (
+    #         self.context.get('request').user.is_authenticated
+    #         and Subscribe.objects.filter(user=self.context['request'].user,
+    #                                      author=obj).exists()
+    #     )
 
-    def get_recipes_count(self, obj):
-        return obj.recipes.count()
+    # def get_recipes_count(self, obj):
+    #     return obj.recipes.count()
 
     def get_recipes(self, obj):
         request = self.context.get('request')
@@ -145,9 +145,9 @@ class SubscribeSerializer(serializers.ModelSerializer):
     """[POST, DELETE] Подписка на автора и отписка."""
     email = serializers.ReadOnlyField()
     username = serializers.ReadOnlyField()
-    is_subscribed = serializers.SerializerMethodField()
+    is_subscribed = serializers.BooleanField(default=False)
     recipes = ShortReadRecipeSerializer(many=True, read_only=True)
-    recipes_count = serializers.SerializerMethodField()
+    recipes_count = serializers.BooleanField()
 
     class Meta:
         model = User
@@ -161,15 +161,15 @@ class SubscribeSerializer(serializers.ModelSerializer):
             raise serializers.ValidationError({'errors': 'Ошибка подписки.'})
         return obj
 
-    def get_is_subscribed(self, obj):
-        return (
-            self.context.get('request').user.is_authenticated
-            and Subscribe.objects.filter(user=self.context['request'].user,
-                                         author=obj).exists()
-        )
+    # def get_is_subscribed(self, obj):
+    #     return (
+    #         self.context.get('request').user.is_authenticated
+    #         and Subscribe.objects.filter(user=self.context['request'].user,
+    #                                      author=obj).exists()
+    #     )
 
-    def get_recipes_count(self, obj):
-        return obj.recipes.count()
+    # def get_recipes_count(self, obj):
+    #     return obj.recipes.count()
 
 
 class IngredientSerializer(serializers.ModelSerializer):
